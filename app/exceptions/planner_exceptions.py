@@ -5,6 +5,10 @@ class PlannerError(Exception):
     """Base exception for planner-related errors."""
 
 
+class ClipboardError(PlannerError):
+    """Raised when the clipboard contents cannot be read."""
+
+
 class PlannerBlockNotFoundError(PlannerError):
     """Raised when the planner block markers cannot be found."""
 
