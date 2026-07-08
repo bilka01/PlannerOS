@@ -1,11 +1,12 @@
 from app.config import ensure_directories, get_project_paths
-from app.handlers.calendar import handle_calendar
+from app.handlers.calendar import CalendarHandler
 from app.handlers.obsidian import handle_obsidian
 from app.handlers.tasks import handle_tasks
 from app.parser.schema import PlannerCommand
 from app.utils.logging import get_logger
 
 logger = get_logger("planneros.dispatcher")
+calendar_handler = CalendarHandler()
 
 
 def dispatch(command: PlannerCommand) -> None:
@@ -15,7 +16,7 @@ def dispatch(command: PlannerCommand) -> None:
     logger.info("Dispatching planner command: %s", command.type)
 
     if command.calendar:
-        handle_calendar(command)
+        calendar_handler.handle(command.calendar)
 
     if command.tasks:
         handle_tasks(command)

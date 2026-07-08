@@ -11,10 +11,10 @@ from app.parser.schema import PlannerCommand
 def test_dispatch_invokes_handlers_for_non_empty_command_sections(
     monkeypatch,
 ) -> None:
-    received: list[tuple[str, PlannerCommand]] = []
+    received: list[tuple[str, object]] = []
 
-    def fake_calendar_handler(command: PlannerCommand) -> None:
-        received.append(("calendar", command))
+    def fake_calendar_handler(events: list[dict]) -> None:
+        received.append(("calendar", events))
 
     def fake_tasks_handler(command: PlannerCommand) -> None:
         received.append(("tasks", command))
@@ -22,7 +22,7 @@ def test_dispatch_invokes_handlers_for_non_empty_command_sections(
     def fake_obsidian_handler(command: PlannerCommand) -> None:
         received.append(("obsidian", command))
 
-    monkeypatch.setattr(dispatcher, "handle_calendar", fake_calendar_handler)
+    monkeypatch.setattr(dispatcher.calendar_handler, "handle", fake_calendar_handler)
     monkeypatch.setattr(dispatcher, "handle_tasks", fake_tasks_handler)
     monkeypatch.setattr(dispatcher, "handle_obsidian", fake_obsidian_handler)
 
@@ -45,7 +45,7 @@ def test_dispatch_invokes_handlers_for_non_empty_command_sections(
     dispatcher.dispatch(command)
 
     assert received == [
-        ("calendar", command),
+        ("calendar", command.calendar),
         ("tasks", command),
         ("obsidian", command),
     ]
@@ -54,7 +54,7 @@ def test_dispatch_invokes_handlers_for_non_empty_command_sections(
 def test_dispatch_skips_handlers_for_empty_command_sections(monkeypatch) -> None:
     received: list[str] = []
 
-    def fake_calendar_handler(command: PlannerCommand) -> None:
+    def fake_calendar_handler(events: list[dict]) -> None:
         received.append("calendar")
 
     def fake_tasks_handler(command: PlannerCommand) -> None:
@@ -63,7 +63,7 @@ def test_dispatch_skips_handlers_for_empty_command_sections(monkeypatch) -> None
     def fake_obsidian_handler(command: PlannerCommand) -> None:
         received.append("obsidian")
 
-    monkeypatch.setattr(dispatcher, "handle_calendar", fake_calendar_handler)
+    monkeypatch.setattr(dispatcher.calendar_handler, "handle", fake_calendar_handler)
     monkeypatch.setattr(dispatcher, "handle_tasks", fake_tasks_handler)
     monkeypatch.setattr(dispatcher, "handle_obsidian", fake_obsidian_handler)
 
