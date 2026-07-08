@@ -20,8 +20,8 @@ def test_dispatch_invokes_handlers_for_non_empty_command_sections(
     def fake_tasks_handler(tasks: list[dict]) -> None:
         received.append(("tasks", tasks))
 
-    def fake_obsidian_handler(command: PlannerCommand) -> None:
-        received.append(("obsidian", command))
+    def fake_obsidian_handler(obsidian: dict) -> None:
+        received.append(("obsidian", obsidian))
 
     monkeypatch.setattr(dispatcher.calendar_handler, "handle", fake_calendar_handler)
     monkeypatch.setattr(
@@ -29,7 +29,11 @@ def test_dispatch_invokes_handlers_for_non_empty_command_sections(
         "tasks_handler",
         SimpleNamespace(handle=fake_tasks_handler),
     )
-    monkeypatch.setattr(dispatcher, "handle_obsidian", fake_obsidian_handler)
+    monkeypatch.setattr(
+        dispatcher,
+        "obsidian_handler",
+        SimpleNamespace(handle=fake_obsidian_handler),
+    )
 
     clipboard_text = """
     Daily plan:
@@ -52,7 +56,7 @@ def test_dispatch_invokes_handlers_for_non_empty_command_sections(
     assert received == [
         ("calendar", command.calendar),
         ("tasks", command.tasks),
-        ("obsidian", command),
+        ("obsidian", command.obsidian),
     ]
 
 
@@ -65,7 +69,7 @@ def test_dispatch_skips_handlers_for_empty_command_sections(monkeypatch) -> None
     def fake_tasks_handler(tasks: list[dict]) -> None:
         received.append("tasks")
 
-    def fake_obsidian_handler(command: PlannerCommand) -> None:
+    def fake_obsidian_handler(obsidian: dict) -> None:
         received.append("obsidian")
 
     monkeypatch.setattr(dispatcher.calendar_handler, "handle", fake_calendar_handler)
@@ -74,7 +78,11 @@ def test_dispatch_skips_handlers_for_empty_command_sections(monkeypatch) -> None
         "tasks_handler",
         SimpleNamespace(handle=fake_tasks_handler),
     )
-    monkeypatch.setattr(dispatcher, "handle_obsidian", fake_obsidian_handler)
+    monkeypatch.setattr(
+        dispatcher,
+        "obsidian_handler",
+        SimpleNamespace(handle=fake_obsidian_handler),
+    )
 
     clipboard_text = """
     <!-- AI_PLANNER_START -->
