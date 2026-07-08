@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -16,14 +17,18 @@ def test_dispatch_invokes_handlers_for_non_empty_command_sections(
     def fake_calendar_handler(events: list[dict]) -> None:
         received.append(("calendar", events))
 
-    def fake_tasks_handler(command: PlannerCommand) -> None:
-        received.append(("tasks", command))
+    def fake_tasks_handler(tasks: list[dict]) -> None:
+        received.append(("tasks", tasks))
 
     def fake_obsidian_handler(command: PlannerCommand) -> None:
         received.append(("obsidian", command))
 
     monkeypatch.setattr(dispatcher.calendar_handler, "handle", fake_calendar_handler)
-    monkeypatch.setattr(dispatcher, "handle_tasks", fake_tasks_handler)
+    monkeypatch.setattr(
+        dispatcher,
+        "tasks_handler",
+        SimpleNamespace(handle=fake_tasks_handler),
+    )
     monkeypatch.setattr(dispatcher, "handle_obsidian", fake_obsidian_handler)
 
     clipboard_text = """
@@ -46,7 +51,7 @@ def test_dispatch_invokes_handlers_for_non_empty_command_sections(
 
     assert received == [
         ("calendar", command.calendar),
-        ("tasks", command),
+        ("tasks", command.tasks),
         ("obsidian", command),
     ]
 
@@ -57,14 +62,18 @@ def test_dispatch_skips_handlers_for_empty_command_sections(monkeypatch) -> None
     def fake_calendar_handler(events: list[dict]) -> None:
         received.append("calendar")
 
-    def fake_tasks_handler(command: PlannerCommand) -> None:
+    def fake_tasks_handler(tasks: list[dict]) -> None:
         received.append("tasks")
 
     def fake_obsidian_handler(command: PlannerCommand) -> None:
         received.append("obsidian")
 
     monkeypatch.setattr(dispatcher.calendar_handler, "handle", fake_calendar_handler)
-    monkeypatch.setattr(dispatcher, "handle_tasks", fake_tasks_handler)
+    monkeypatch.setattr(
+        dispatcher,
+        "tasks_handler",
+        SimpleNamespace(handle=fake_tasks_handler),
+    )
     monkeypatch.setattr(dispatcher, "handle_obsidian", fake_obsidian_handler)
 
     clipboard_text = """

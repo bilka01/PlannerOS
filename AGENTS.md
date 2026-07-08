@@ -49,10 +49,7 @@ Handlers never communicate with each other.
 
 All communication goes through Dispatcher.
 
-
 ---
-
-
 
 ## Architecture Rule
 
