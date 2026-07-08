@@ -1,4 +1,3 @@
-
 # PlannerOS
 
 PlannerOS is a local AI-powered productivity assistant that turns ChatGPT plans into executable actions.
@@ -62,21 +61,114 @@ No external integrations are implemented yet.
 ## Project Structure
 
 ```
-PlannerOS/
+# PlannerOS
+
+Short description
+
+---
+
+## Features
+
+- Clipboard import
+- Planner parser
+- Global hotkey
+- Calendar handler
+- Tasks handler
+- Obsidian handler
+
+---
+
+## Architecture
+
+Diagram
+
+---
+
+## Requirements
+
+Python
+
+WSL
+
+Virtual environment
+
+---
+
+## Installation
+
+git clone
+
+python -m venv
+
+pip install
+
+---
+
+## Running
+
+python main.py
+
+---
+
+## Running Tests
+
+pytest
+
+---
+
+## Project Structure
 
 app/
-    clipboard/
-    core/
-    exceptions/
-    handlers/
-    hotkeys/
-    models/
-    parser/
-    utils/
 
 tests/
-vault/
+
 logs/
+
+...
+
+---
+
+## Development Workflow
+
+Issue
+
+↓
+
+Implement
+
+↓
+
+pytest
+
+↓
+
+Commit
+
+↓
+
+Push
+
+---
+
+## Roadmap
+
+Current MVP
+
+Future
+
+- Google Calendar
+
+- Obsidian integration
+
+- Notifications
+
+- AI improvements
+
+---
+
+## License
+
+MIT
 ```
 
 ## Documentation
