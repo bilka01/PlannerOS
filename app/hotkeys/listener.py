@@ -1,24 +1,44 @@
-import keyboard
+from __future__ import annotations
 
-from app.clipboard.clipboard import get_clipboard_text
-from app.core.dispatcher import dispatch
-from app.parser.parser import PlannerParser
+from typing import Any
+
+from app.core.pipeline import PlannerPipeline
 from app.utils.logging import get_logger
 
 logger = get_logger("planneros.hotkeys.listener")
 
-
-def import_plan() -> None:
-    try:
-        text = get_clipboard_text()
-        command = PlannerParser().parse(text)
-        dispatch(command)
-        logger.info("Plan imported successfully")
-    except Exception as exc:
-        logger.exception("Failed to import plan: %s", exc)
+HOTKEY = "ctrl+shift+p"
 
 
-def start_listener() -> None:
-    keyboard.add_hotkey("ctrl+shift+p", import_plan)
-    logger.info("Listening for Ctrl+Shift+P")
-    keyboard.wait()
+class HotkeyListener:
+    """Registers the global import hotkey and runs the planner pipeline."""
+
+    def __init__(
+        self,
+        pipeline: PlannerPipeline | None = None,
+        keyboard_module: Any | None = None,
+    ) -> None:
+        if keyboard_module is None:
+            import keyboard as keyboard_module
+
+        self._pipeline = pipeline if pipeline is not None else PlannerPipeline()
+        self._keyboard = keyboard_module
+        self._hotkey_handle: object | None = None
+
+    def start(self) -> None:
+        """Register the hotkey and begin listening for it."""
+        self._hotkey_handle = self._keyboard.add_hotkey(HOTKEY, self._on_hotkey)
+        logger.info("Listening for %s", HOTKEY)
+
+    def stop(self) -> None:
+        """Unregister the hotkey, if one is currently registered."""
+        if self._hotkey_handle is not None:
+            self._keyboard.remove_hotkey(self._hotkey_handle)
+            self._hotkey_handle = None
+
+    def _on_hotkey(self) -> None:
+        """Run the planner pipeline, logging any failure without crashing."""
+        try:
+            self._pipeline.run()
+        except Exception:
+            logger.exception("Hotkey callback failed")
