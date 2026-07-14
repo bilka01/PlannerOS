@@ -1,38 +1,55 @@
 # PlannerOS
 
-PlannerOS is a local productivity assistant that turns structured planner blocks into validated, typed commands and routes them through a simple execution pipeline.
+PlannerOS is an AI-powered productivity automation tool that processes structured planner blocks and performs actions across multiple productivity applications.
 
 PlannerOS does not generate plans. ChatGPT creates the planner block, and PlannerOS imports, validates, and dispatches it.
 
-## Features
+## Current Features
 
-- Clipboard import for planner blocks copied from ChatGPT
-- Planner parsing using explicit start and end markers
-- Planner pipeline that coordinates clipboard reading, parsing, and dispatching
-- Typed `PlannerCommand` objects used after parsing
-- Dispatcher that routes validated commands to handlers
-- Calendar handler that logs calendar actions
-- Tasks handler that logs task actions
-- Obsidian handler that logs note update actions
-- Global hotkey listener (`Ctrl+Shift+P`) to trigger imports
-- Shared logging across the application
-- Automated test coverage, including an end-to-end integration test
+- ✅ Clipboard monitoring
+- ✅ Global hotkey
+- ✅ Planner block parser
+- ✅ JSON schema validation
+- ✅ Planner pipeline
+- ✅ Dispatcher
+- ✅ Google Calendar integration
+- ✅ Obsidian integration
+- ✅ Markdown task writing
+- ✅ Comprehensive automated tests
 
 ## Architecture
 
 ```text
 Clipboard
-↓
+        │
+        ▼
 PlannerPipeline
-↓
+        │
+        ▼
 PlannerParser
-↓
+        │
+        ▼
 PlannerCommand
-↓
+        │
+        ▼
 Dispatcher
-├── CalendarHandler
-├── TasksHandler
-└── ObsidianHandler
+        ├── CalendarHandler
+        │        ▼
+        │   GoogleCalendarService
+        │        ▼
+        │ Google Calendar
+        │
+        ├── TasksHandler
+        │        ▼
+        │    TasksService
+        │        ▼
+        │   Markdown Tasks
+        │
+        └── ObsidianHandler
+                 ▼
+          ObsidianService
+                 ▼
+          Markdown Notes
 ```
 
 `Clipboard`
@@ -51,7 +68,7 @@ The validated domain object passed through the dispatcher and handlers.
 Routes validated command sections to the appropriate handlers.
 
 `CalendarHandler`, `TasksHandler`, `ObsidianHandler`
-MVP handlers that receive validated data and log the actions PlannerOS would perform.
+Handlers that orchestrate integration-specific services for calendar events, markdown tasks, and markdown notes.
 
 ## Project Structure
 
@@ -62,6 +79,7 @@ app/
   exceptions/
   handlers/
   hotkeys/
+  integrations/
   models/
   parser/
   utils/
@@ -88,13 +106,11 @@ main.py
    git clone <repo-url>
    cd ai_planner
    ```
-
 2. Create a virtual environment:
 
    ```bash
    python -m venv .venv
    ```
-
 3. Activate the virtual environment:
 
    ```bash
@@ -106,54 +122,58 @@ main.py
    ```powershell
    .\.venv\Scripts\Activate.ps1
    ```
-
 4. Install runtime dependencies:
 
    ```bash
    pip install -r requirements.txt
    ```
-
 5. Install development dependencies:
 
    ```bash
    pip install -r requirements-dev.txt
    ```
+6. Configure Google OAuth credentials and the environment variables below.
 
-## Running
+### Environment Variables
 
-Start PlannerOS with:
+- `PLANNEROS_GOOGLE_CLIENT_SECRET_FILE` — path to the Google OAuth client secret JSON file
+- `PLANNEROS_GOOGLE_TOKEN_FILE` — path to the Google OAuth token file
+- `PLANNEROS_OBSIDIAN_VAULT` — path to the Obsidian vault directory
+- `PLANNEROS_TASKS_FILE` — path to the markdown task file
 
-```bash
-python main.py
-```
+## Usage
 
-When the application is running, copy a ChatGPT response that contains a planner block and press `Ctrl+Shift+P` to trigger the import pipeline.
+1. Run PlannerOS:
+
+   ```bash
+   python main.py
+   ```
+2. Copy a planner block containing calendar, tasks, or Obsidian instructions into the clipboard.
+3. Press `Ctrl+Shift+P` to trigger the import pipeline.
+4. PlannerOS processes the planner block and writes output to:
+   - Google Calendar
+   - Markdown tasks file
+   - Obsidian notes
 
 ## Running Tests
 
 Run the test suite with:
 
 ```bash
-pytest
+python -m pytest -q
 ```
 
-The project currently contains 43 automated tests, including parser, dispatcher, handler, hotkey, logging, clipboard, pipeline, and end-to-end coverage.
+The project currently contains 57 automated tests covering parser, dispatcher, handler, hotkey, logging, clipboard, pipeline, calendar, Obsidian, tasks, and end-to-end flows.
 
-## Current Status
+## Current Limitations
 
-PlannerOS is MVP feature complete for `v0.1.0-beta.1`.
-
-The current handlers are intentionally log-only. They receive validated command data and log what would be executed, but they do not yet perform live integrations with Google Calendar, task systems, or Obsidian files.
-
-## Roadmap
-
-Planned future work includes:
-
-- Google Calendar integration
-- Real Obsidian file writing
-- Task integrations
-- Notifications
-- Desktop UI
+- No duplicate calendar detection
+- No event updates
+- No recurring events
+- Markdown task appending only
+- No task synchronization
+- No Obsidian templates
+- No frontmatter generation
 
 ## Contributing
 

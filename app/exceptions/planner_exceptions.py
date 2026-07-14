@@ -51,3 +51,11 @@ class ObsidianVaultNotFoundError(ObsidianIntegrationError):
 
 class ObsidianWriteError(ObsidianIntegrationError):
     """Raised when an Obsidian note cannot be created or updated."""
+
+
+class TasksIntegrationError(PlannerError):
+    """Base exception for task integration failures."""
+
+
+class TasksWriteError(TasksIntegrationError):
+    """Raised when a tasks markdown file cannot be created or updated."""

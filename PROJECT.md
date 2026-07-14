@@ -1,4 +1,3 @@
-
 # PlannerOS
 
 PlannerOS is a local AI-powered productivity assistant that turns ChatGPT plans into executable actions.
@@ -11,14 +10,31 @@ Instead:
 - PlannerOS validates it.
 - PlannerOS executes it.
 
-## Features (MVP)
+## Current Status
+
+✅ Core Architecture
+
+✅ Testing
+
+✅ End-to-End Integration
+
+✅ Google Calendar
+
+✅ Obsidian
+
+✅ Markdown Tasks
+
+## Features
 
 - Global hotkey
 - Clipboard integration
 - Planner block parser
-- JSON validation
+- JSON schema validation
 - Command dispatcher
 - Modular handlers
+- Google Calendar integration
+- Obsidian Markdown note writing
+- Markdown task file writing
 
 ## Installation
 
@@ -47,7 +63,7 @@ Instead:
 5. Run the test suite to confirm everything is working:
 
    ```bash
-   pytest
+   python -m pytest -q
    ```
 6. Start PlannerOS:
 
@@ -59,7 +75,7 @@ Instead:
 
 ## Architecture
 
-```
+```text
 ChatGPT
     │
     ▼
@@ -69,36 +85,36 @@ Planner Block
 Clipboard
     │
     ▼
-Parser
+PlannerPipeline
+    │
+    ▼
+PlannerParser
     │
     ▼
 PlannerCommand
     │
     ▼
 Dispatcher
-    │
-    ├── Calendar
-    ├── Tasks
-    └── Obsidian
+    ├── CalendarHandler
+    │      ▼
+    │   GoogleCalendarService
+    │      ▼
+    │ Google Calendar
+    ├── TasksHandler
+    │      ▼
+    │    TasksService
+    │      ▼
+    │ Markdown Tasks
+    └── ObsidianHandler
+           ▼
+      ObsidianService
+           ▼
+      Markdown Notes
 ```
-
-## Current Status
-
-🚧 MVP v0.1 in development
-
-Current focus:
-
-- Parser
-- Dispatcher
-- Clipboard
-- Hotkey
-- Logging
-
-No external integrations are implemented yet.
 
 ## Project Structure
 
-```
+```text
 PlannerOS/
 
 app/
@@ -107,6 +123,7 @@ app/
     exceptions/
     handlers/
     hotkeys/
+    integrations/
     models/
     parser/
     utils/
@@ -131,15 +148,21 @@ logs/
 - keyboard
 - pyperclip
 
+## Release History
+
+- v0.1.0 — Core MVP
+- v0.2.0 — Google Calendar Integration
+- v0.3.0 — Obsidian Integration
+- v0.4.0 — Markdown Tasks
+
 ## Roadmap
 
-- MVP execution flow
-- Google Calendar
-- Obsidian
-- Statistics
-- Analytics
-- Local AI support
+- CAL-004 — Duplicate Calendar Detection
+- CAL-005 — Event Updates
+- CONFIG-001 — Configuration File
+- WIN-001 — Windows Packaging
+- v1.0.0 — Stable Release
 
 ## License
 
-TBD
+MIT

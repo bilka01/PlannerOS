@@ -26,5 +26,5 @@ class PlannerPipeline:
             text = self._clipboard.get_text()
             command = self._parser.parse(text)
             dispatch(command)
-        except PlannerError:
-            logger.exception("Planner pipeline failed")
+        except PlannerError as exc:
+            logger.error("Planner pipeline failed: %s", exc)

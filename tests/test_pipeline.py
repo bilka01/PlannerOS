@@ -4,6 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.core.pipeline import PlannerPipeline
+from app.exceptions.planner_exceptions import ObsidianVaultNotFoundError
 from app.parser.schema import PlannerCommand
 
 CLIPBOARD_TEXT = """
@@ -66,3 +67,34 @@ def test_pipeline_handles_parser_errors(monkeypatch) -> None:
     pipeline = PlannerPipeline()
 
     pipeline.run()
+
+
+def test_pipeline_logs_planner_errors_without_traceback(monkeypatch) -> None:
+    class FakeLogger:
+        def __init__(self) -> None:
+            self.error_calls: list[tuple[str, tuple]] = []
+            self.exception_calls: list[tuple[str, tuple]] = []
+
+        def error(self, message: str, *args: object) -> None:
+            self.error_calls.append((message, args))
+
+        def exception(self, message: str, *args: object) -> None:
+            self.exception_calls.append((message, args))
+
+    fake_logger = FakeLogger()
+    monkeypatch.setattr("app.core.pipeline.logger", fake_logger)
+
+    def fake_dispatch(command: PlannerCommand) -> None:
+        raise ObsidianVaultNotFoundError("Obsidian vault does not exist")
+
+    monkeypatch.setattr("app.core.pipeline.dispatch", fake_dispatch)
+
+    pipeline = PlannerPipeline()
+    pipeline.run()
+
+    assert len(fake_logger.error_calls) == 1
+    assert fake_logger.error_calls[0][0] == "Planner pipeline failed: %s"
+    assert len(fake_logger.error_calls[0][1]) == 1
+    assert isinstance(fake_logger.error_calls[0][1][0], ObsidianVaultNotFoundError)
+    assert str(fake_logger.error_calls[0][1][0]) == "Obsidian vault does not exist"
+    assert fake_logger.exception_calls == []

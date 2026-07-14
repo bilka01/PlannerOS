@@ -1,58 +1,86 @@
-
 # PlannerOS Context
 
 ## Current Status
 
 Version:
-v0.1.0-alpha.3
+v0.4.0
 
-## Architecture
+## Current Architecture
 
+```text
 Clipboard
 ↓
-
-PlannerPipeline
+Parser
 ↓
-
-PlannerParser
-↓
-
 PlannerCommand
 ↓
+Dispatcher
+↓
+Google Calendar
+↓
+Markdown Tasks
+↓
+Obsidian Notes
+```
 
+## Current Integrations
+
+- Google Calendar integration via `GoogleCalendarService`
+- Obsidian note writing via `ObsidianService`
+- Markdown task file writing via `TasksService`
+- Shared logging and dispatcher orchestration
+
+## Execution Flow
+
+```text
+Clipboard
+↓
+PlannerPipeline
+↓
+PlannerParser
+↓
+PlannerCommand
+↓
 Dispatcher
 ├── CalendarHandler
 ├── TasksHandler
 └── ObsidianHandler
+```
 
-## Completed
+## Testing Status
 
-- Parser
-- Clipboard
-- Pipeline
-- Hotkey
-- Logging
-- Dispatcher
-- Calendar Handler
-- Tasks Handler
-- Obsidian Handler
-- End-to-End Test
+- 57 automated tests
+- Includes parser, dispatcher, handlers, hotkey, logging, clipboard, pipeline, calendar, Obsidian, tasks, and end-to-end coverage
 
-## Testing
+## Completed Releases
 
-43 passing tests
+- v0.1.0 — Core MVP
+- v0.2.0 — Google Calendar Integration
+- v0.3.0 — Obsidian Integration
+- v0.4.0 — Markdown Tasks
 
-## Remaining
+## Known Limitations
 
-- README
-- GitHub Release
-- v0.1.0-beta.1
+- No duplicate calendar detection
+- No event updates
+- No recurring events
+- Markdown task appending only
+- No task synchronization
+- No Obsidian templates
+- No frontmatter generation
 
-## Rules
+## Current Roadmap
 
-- One responsibility per class.
-- No compatibility wrappers.
-- Use handler classes directly.
-- Parser returns PlannerCommand.
-- Dispatcher routes validated PlannerCommand.
-- Every feature requires tests.
+- CAL-004 — Duplicate Calendar Detection
+- CAL-005 — Event Updates
+- CONFIG-001 — Configuration File
+- WIN-001 — Windows Packaging
+- v1.0.0 — Stable Release
+
+## Implementation Conventions
+
+- Handler = orchestration only
+- Service = external integrations
+- Dispatcher never performs business logic
+- Parser remains independent
+- New integrations should follow the Handler → Service pattern

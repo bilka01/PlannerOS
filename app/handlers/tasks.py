@@ -1,17 +1,17 @@
+from app.integrations.tasks.tasks_service import TasksService
 from app.utils.logging import get_logger
 
 logger = get_logger("planneros.tasks")
 
 
 class TasksHandler:
-    """Log tasks that PlannerOS would create.
+    """Orchestrate task writing through the service layer."""
 
-    This is an MVP handler: it performs no schema validation and makes no
-    external calls. Its only responsibility is to log what would be executed.
-    """
+    def __init__(self, service: TasksService | None = None) -> None:
+        self._service = service if service is not None else TasksService()
 
     def handle(self, tasks: list[dict]) -> None:
-        """Log each task that would be created.
+        """Write tasks to disk through the service layer.
 
         Args:
             tasks: Already validated task dictionaries.
@@ -19,11 +19,6 @@ class TasksHandler:
         if not tasks:
             return
 
-        for task in tasks:
-            logger.info("Creating task")
-            logger.info("Title: %s", task.get("title"))
-            logger.info("Priority: %s", task.get("priority"))
-            logger.info("Due: %s", task.get("due"))
-            logger.info("Description: %s", task.get("description"))
-            logger.info("Completed: %s", task.get("completed"))
+        logger.info("Opening task file...")
+        self._service.write_tasks(tasks)
 
