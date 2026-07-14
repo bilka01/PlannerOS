@@ -1,4 +1,4 @@
-"""Custom exceptions for PlannerOS parsing and validation."""
+"""Custom exceptions for PlannerOS parsing, validation, and integrations."""
 
 
 class PlannerError(Exception):
@@ -23,3 +23,19 @@ class UnsupportedPlannerVersionError(PlannerError):
 
 class PlannerValidationError(PlannerError):
     """Raised when required planner fields are missing or invalid."""
+
+
+class CalendarIntegrationError(PlannerError):
+    """Base exception for calendar integration failures."""
+
+
+class MissingGoogleCredentialsError(CalendarIntegrationError):
+    """Raised when Google OAuth client credentials are not available."""
+
+
+class GoogleAuthenticationError(CalendarIntegrationError):
+    """Raised when Google Calendar authentication fails."""
+
+
+class GoogleCalendarAPIError(CalendarIntegrationError):
+    """Raised when Google Calendar API operations fail."""

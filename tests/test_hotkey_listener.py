@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.hotkeys.listener import HOTKEY, HotkeyListener
+from app.hotkeys.listener import HOTKEY, HotkeyListener, start_listener
 
 
 class FakeKeyboard:
@@ -13,14 +13,22 @@ class FakeKeyboard:
         self.handle = object()
         self.registered_hotkey: str | None = None
         self.removed_hotkeys: list[object] = []
+        self.wait_count = 0
+        self.start_error: Exception | None = None
 
     def add_hotkey(self, hotkey: str, callback: Callable[[], None]) -> object:
+        if self.start_error is not None:
+            raise self.start_error
+
         self.registered_hotkey = hotkey
         self.callback = callback
         return self.handle
 
     def remove_hotkey(self, hotkey: object) -> None:
         self.removed_hotkeys.append(hotkey)
+
+    def wait(self) -> None:
+        self.wait_count += 1
 
 
 class FakePipeline:
@@ -104,3 +112,29 @@ def test_hotkey_callback_errors_are_handled(monkeypatch) -> None:
 
     assert pipeline.run_count == 1
     assert fake_logger.exceptions == ["Hotkey callback failed"]
+
+
+def test_start_listener_registers_hotkey_and_waits(monkeypatch) -> None:
+    keyboard = FakeKeyboard()
+
+    monkeypatch.setitem(sys.modules, "keyboard", keyboard)
+
+    start_listener()
+
+    assert keyboard.registered_hotkey == HOTKEY
+    assert keyboard.callback is not None
+    assert keyboard.wait_count == 1
+
+
+def test_start_listener_handles_keyboard_import_error(monkeypatch) -> None:
+    keyboard = FakeKeyboard()
+    keyboard.start_error = ImportError("You must be root to use this library on linux.")
+    fake_logger = FakeLogger()
+
+    monkeypatch.setitem(sys.modules, "keyboard", keyboard)
+    monkeypatch.setattr("app.hotkeys.listener.logger", fake_logger)
+
+    start_listener()
+
+    assert keyboard.wait_count == 0
+    assert fake_logger.exceptions == ["Failed to start hotkey listener"]

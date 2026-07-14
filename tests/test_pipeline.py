@@ -42,7 +42,7 @@ def test_pipeline_reads_parses_and_dispatches(monkeypatch) -> None:
     assert dispatched[0].type == "daily_plan"
 
 
-def test_pipeline_propagates_clipboard_errors(monkeypatch) -> None:
+def test_pipeline_handles_clipboard_errors(monkeypatch) -> None:
     from app.exceptions.planner_exceptions import ClipboardError
 
     class FailingClipboard:
@@ -53,8 +53,16 @@ def test_pipeline_propagates_clipboard_errors(monkeypatch) -> None:
 
     pipeline = PlannerPipeline()
 
-    try:
-        pipeline.run()
-        assert False, "Expected ClipboardError to propagate"
-    except ClipboardError:
-        pass
+    pipeline.run()
+
+
+def test_pipeline_handles_parser_errors(monkeypatch) -> None:
+    class InvalidClipboard:
+        def get_text(self) -> str:
+            return "No planner block here."
+
+    monkeypatch.setattr("app.core.pipeline.Clipboard", InvalidClipboard)
+
+    pipeline = PlannerPipeline()
+
+    pipeline.run()

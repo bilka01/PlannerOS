@@ -21,3 +21,8 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Google OAuth credentials
+client_secret.json
+token.json
+

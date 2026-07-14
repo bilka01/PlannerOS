@@ -14,21 +14,33 @@ class FakeLogger:
         self.info_calls.append((message, args))
 
 
+class FakeCalendarService:
+    def __init__(self) -> None:
+        self.created_events: list[dict] = []
+
+    def create_event(self, event: dict) -> dict:
+        self.created_events.append(event)
+        return {"id": f"event-{len(self.created_events)}"}
+
+
 def test_handle_with_empty_events_does_nothing(monkeypatch) -> None:
     fake_logger = FakeLogger()
+    fake_service = FakeCalendarService()
     monkeypatch.setattr("app.handlers.calendar.logger", fake_logger)
 
-    handler = CalendarHandler()
+    handler = CalendarHandler(service=fake_service)
     handler.handle([])
 
+    assert fake_service.created_events == []
     assert fake_logger.info_calls == []
 
 
-def test_handle_logs_single_event(monkeypatch) -> None:
+def test_handle_delegates_single_event_to_service(monkeypatch) -> None:
     fake_logger = FakeLogger()
+    fake_service = FakeCalendarService()
     monkeypatch.setattr("app.handlers.calendar.logger", fake_logger)
 
-    handler = CalendarHandler()
+    handler = CalendarHandler(service=fake_service)
     event = {
         "title": "Doctor Appointment",
         "start": "2026-07-10T09:00",
@@ -39,76 +51,30 @@ def test_handle_logs_single_event(monkeypatch) -> None:
 
     handler.handle([event])
 
+    assert fake_service.created_events == [event]
     assert fake_logger.info_calls == [
-        ("Creating calendar event", ()),
-        ("Title: %s", ("Doctor Appointment",)),
-        ("Start: %s", ("2026-07-10T09:00",)),
-        ("End: %s", ("2026-07-10T10:00",)),
-        ("Location: %s", ("Clinic",)),
-        ("Description: %s", ("Annual checkup",)),
+        ("Creating calendar event...", ()),
+        ("Calendar event created successfully. Event id: %s", ("event-1",)),
     ]
 
 
-def test_handle_logs_multiple_events(monkeypatch) -> None:
+def test_handle_delegates_multiple_events_to_service(monkeypatch) -> None:
     fake_logger = FakeLogger()
+    fake_service = FakeCalendarService()
     monkeypatch.setattr("app.handlers.calendar.logger", fake_logger)
 
-    handler = CalendarHandler()
+    handler = CalendarHandler(service=fake_service)
     events = [
-        {
-            "title": "Doctor Appointment",
-            "start": "2026-07-10T09:00",
-            "end": "2026-07-10T10:00",
-            "location": "Clinic",
-            "description": "Annual checkup",
-        },
-        {
-            "title": "Team Standup",
-            "start": "2026-07-10T11:00",
-            "end": "2026-07-10T11:15",
-            "location": "Office",
-            "description": "Daily sync",
-        },
+        {"title": "Doctor Appointment"},
+        {"title": "Team Standup"},
     ]
 
     handler.handle(events)
 
-    assert fake_logger.info_calls[0] == ("Creating calendar event", ())
-    assert fake_logger.info_calls[6] == ("Creating calendar event", ())
-    assert len(fake_logger.info_calls) == 12
-
-
-def test_handle_calls_logger_expected_number_of_times(monkeypatch) -> None:
-    fake_logger = FakeLogger()
-    monkeypatch.setattr("app.handlers.calendar.logger", fake_logger)
-
-    handler = CalendarHandler()
-    events = [{"title": "Event A"}, {"title": "Event B"}, {"title": "Event C"}]
-
-    handler.handle(events)
-
-    assert len(fake_logger.info_calls) == len(events) * 6
-
-
-def test_handler_with_single_event_logs_expected_output(monkeypatch) -> None:
-    fake_logger = FakeLogger()
-    monkeypatch.setattr("app.handlers.calendar.logger", fake_logger)
-
-    handler = CalendarHandler()
-    events = [{"title": "Doctor Appointment"}]
-
-    handler.handle(events)
-
-    assert fake_logger.info_calls[0] == ("Creating calendar event", ())
-    assert len(fake_logger.info_calls) == 6
-
-
-def test_handler_with_empty_events_does_nothing(monkeypatch) -> None:
-    fake_logger = FakeLogger()
-    monkeypatch.setattr("app.handlers.calendar.logger", fake_logger)
-
-    handler = CalendarHandler()
-
-    handler.handle([])
-
-    assert fake_logger.info_calls == []
+    assert fake_service.created_events == events
+    assert fake_logger.info_calls == [
+        ("Creating calendar event...", ()),
+        ("Calendar event created successfully. Event id: %s", ("event-1",)),
+        ("Creating calendar event...", ()),
+        ("Calendar event created successfully. Event id: %s", ("event-2",)),
+    ]

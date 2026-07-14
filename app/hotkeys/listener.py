@@ -42,3 +42,17 @@ class HotkeyListener:
             self._pipeline.run()
         except Exception:
             logger.exception("Hotkey callback failed")
+
+
+def start_listener() -> None:
+    """Start the default global hotkey listener."""
+    import keyboard
+
+    listener = HotkeyListener(keyboard_module=keyboard)
+    try:
+        listener.start()
+    except ImportError:
+        logger.exception("Failed to start hotkey listener")
+        return
+
+    keyboard.wait()

@@ -1,32 +1,34 @@
-"""Calendar handler for PlannerOS.
+"""Calendar handler for PlannerOS."""
 
-MVP implementation: receives already-validated calendar events and logs
-what would be created. There is no integration with Google Calendar or
-any other external service yet.
-"""
+from __future__ import annotations
 
+from typing import Any
+
+from app.integrations.google.calendar_service import GoogleCalendarService
 from app.utils.logging import get_logger
 
 logger = get_logger("planneros.calendar")
 
 
 class CalendarHandler:
-    """Logs calendar events that PlannerOS would create.
+    """Orchestrate calendar event creation through the Google service."""
 
-    This is an MVP handler: it performs no schema validation (the parser
-    already validated the data) and makes no external calls. Its only
-    responsibility is to log what would be executed.
-    """
-    def handle(self, events: list[dict]) -> None:
-        """Log each calendar event that would be created.
+    def __init__(self, service: GoogleCalendarService | None = None) -> None:
+        self._service = service if service is not None else GoogleCalendarService()
+
+    def handle(self, events: list[dict[str, Any]]) -> None:
+        """Create each validated calendar event through the service layer.
 
         Args:
             events: Already validated calendar event dictionaries.
         """
+        if not events:
+            return
+
         for event in events:
-            logger.info("Creating calendar event")
-            logger.info("Title: %s", event.get("title"))
-            logger.info("Start: %s", event.get("start"))
-            logger.info("End: %s", event.get("end"))
-            logger.info("Location: %s", event.get("location"))
-            logger.info("Description: %s", event.get("description"))
+            logger.info("Creating calendar event...")
+            created_event = self._service.create_event(event)
+            logger.info(
+                "Calendar event created successfully. Event id: %s",
+                created_event.get("id"),
+            )

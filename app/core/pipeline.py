@@ -2,7 +2,11 @@
 
 from app.clipboard.clipboard import Clipboard
 from app.core.dispatcher import dispatch
+from app.exceptions.planner_exceptions import PlannerError
 from app.parser.parser import PlannerParser
+from app.utils.logging import get_logger
+
+logger = get_logger("planneros.core.pipeline")
 
 
 class PlannerPipeline:
@@ -18,6 +22,9 @@ class PlannerPipeline:
 
     def run(self) -> None:
         """Read the clipboard, parse it, and dispatch the resulting command."""
-        text = self._clipboard.get_text()
-        command = self._parser.parse(text)
-        dispatch(command)
+        try:
+            text = self._clipboard.get_text()
+            command = self._parser.parse(text)
+            dispatch(command)
+        except PlannerError:
+            logger.exception("Planner pipeline failed")
