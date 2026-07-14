@@ -1,3 +1,4 @@
+
 # PlannerOS Context
 
 ## Current Status
@@ -66,8 +67,10 @@ Dispatcher
 - No recurring events
 - Markdown task appending only
 - No task synchronization
+- No completion tracking
 - No Obsidian templates
 - No frontmatter generation
+- No Obsidian duplicate note detection
 
 ## Current Roadmap
 
@@ -83,4 +86,5 @@ Dispatcher
 - Service = external integrations
 - Dispatcher never performs business logic
 - Parser remains independent
+- Services own external APIs/filesystems
 - New integrations should follow the Handler → Service pattern
