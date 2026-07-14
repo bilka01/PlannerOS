@@ -39,3 +39,15 @@ class GoogleAuthenticationError(CalendarIntegrationError):
 
 class GoogleCalendarAPIError(CalendarIntegrationError):
     """Raised when Google Calendar API operations fail."""
+
+
+class ObsidianIntegrationError(PlannerError):
+    """Base exception for Obsidian integration failures."""
+
+
+class ObsidianVaultNotFoundError(ObsidianIntegrationError):
+    """Raised when the configured Obsidian vault does not exist."""
+
+
+class ObsidianWriteError(ObsidianIntegrationError):
+    """Raised when an Obsidian note cannot be created or updated."""
